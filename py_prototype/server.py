@@ -41,8 +41,46 @@ class Client(object):
 
 
 
-def main(argv):
+class ConnectionHandler(SocketServer.BaseRequestHandler):
+    def handle(self):
+        self.request.settimeout(300)
+        try:
+            self.clientip, self.clientport =  self.request.getpeername()
+        except Exception, e:
+            pass
+
+        data = ""
+        try:
+            data = self.request.recv(1024)
+        except Exception, e:
+            if e.message.startswith("timed out"):
+                if(timeouts_reached > 1):
+                timeouts_reached += 1
+            else:
+                pass
+
+            if(timeouts_reached * 300 > cnfig.INACTIVE_CLIENT_TIMEOUT):
+                self.request.close()
+                return
+
+        try:
+            self.request.sendall(response)
+        except Exception, e:
+            pass
+
+class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
+
+
+def main(argv):
+    global SR
+
+    SR = Services()
+
+    server = ThreadedTCPServer(("0.0.0.0", config.service_port), ConnectionHandler)
+    server_thread = threading.Thread(target=server.serve_forever)
+    server_thread.run()
+    server.shutdown()
 
 if __name__ == "__main__":
     main(sys.argv)

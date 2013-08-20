@@ -5,4 +5,7 @@ Projekt ma pozwalać na bezpieczną rozmowę pomiędzy użytkownikami ze szczeg�
 -> brak możliwości podsłuchu/zapisu treści rozmowy przez serwer
 
 1. basic server application on non-ssl port that can create few simple sessions (that can handle few connections)
-2. add ssl support 
+2. add ssl support
+3. connection limits
+4. data send ratio limits
+5. data size limits
