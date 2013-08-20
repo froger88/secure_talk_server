@@ -36,48 +36,44 @@ class Client(object):
     def join(self, session_id, secure_token, nickname):
         pass
 
+    def crete_session():
+        pass
+    
     def close(self):
         pass
 
 
-
 class ConnectionHandler(SocketServer.BaseRequestHandler):
     def handle(self):
-        self.request.settimeout(300)
+        self.request.settimeout(config.INACTIVE_CLIENT_TIMEOUT)
         try:
             self.clientip, self.clientport =  self.request.getpeername()
         except Exception, e:
             pass
 
         data = ""
-        try:
-            data = self.request.recv(1024)
-        except Exception, e:
-            if e.message.startswith("timed out"):
-                if(timeouts_reached > 1):
-                timeouts_reached += 1
-            else:
+        response = ""
+        timeouts_reached = 0
+        while True:
+            try:
+                data = self.request.recv(config.MAX_DATA_SIZE)
+            except Exception, e:
+                if e.message.startswith("timed out"):
+                    self.request.close()
+                else:
+                    print e
+
+            try:
+                self.request.sendall(response)
+            except Exception, e:
                 pass
-
-            if(timeouts_reached * 300 > cnfig.INACTIVE_CLIENT_TIMEOUT):
-                self.request.close()
-                return
-
-        try:
-            self.request.sendall(response)
-        except Exception, e:
-            pass
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
 
 
 def main(argv):
-    global SR
-
-    SR = Services()
-
-    server = ThreadedTCPServer(("0.0.0.0", config.service_port), ConnectionHandler)
+    server = ThreadedTCPServer((config.IP, config.PORT), ConnectionHandler)
     server_thread = threading.Thread(target=server.serve_forever)
     server_thread.run()
     server.shutdown()
