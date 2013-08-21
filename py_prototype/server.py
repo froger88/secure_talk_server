@@ -3,7 +3,8 @@
 
 import sys
 import config
-import gevent
+import SocketServer
+import threading
 
 class Session(object):
     def __init__(self):
@@ -62,11 +63,22 @@ class ConnectionHandler(SocketServer.BaseRequestHandler):
                     self.request.close()
                 else:
                     print e
+                self.request.close()
+                return
 
+            if len(data) == 0:
+                print "connection broken by client"
+                self.request.close()
+                return
+
+            print "%s:%d: %s" % (self.clientip, self.clientport, data.rstrip())
+            
             try:
                 self.request.sendall(response)
             except Exception, e:
-                pass
+                print e
+                self.request.close()
+                return
 
 class ThreadedTCPServer(SocketServer.ThreadingMixIn, SocketServer.TCPServer):
     pass
