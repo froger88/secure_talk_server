@@ -2,15 +2,9 @@
 
 using namespace std;
 
-extern pthread_mutex_t mutex;
-
-void* handle_connection(void* arg)
+void handle_connection(int fd, SSL* ssl, SecureCounter* cnt_handle_connection)
 {
-	cerr << "handle_connection start" << endl << flush;
-	handle_connection_arg_t* handle_arg = static_cast<handle_connection_arg_t*> (arg);
-	int fd = handle_arg->fd;
-	SSL* ssl = handle_arg->ssl;
-
+	cnt_handle_connection->inc();
 	char buf[1024];
 	int count;
 
@@ -48,6 +42,5 @@ cleanup:
 	// return back to pool
 	SSL_free(ssl);
 	close(fd);
-	handle_arg->thread_queue->push(handle_arg->pthread_vector_pos);
-	delete handle_arg;
+	cnt_handle_connection->dec();
 }

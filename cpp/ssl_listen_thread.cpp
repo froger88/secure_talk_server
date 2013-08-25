@@ -2,21 +2,8 @@
 
 using namespace std;
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-
-void* ssl_listen_thread(void* arg)
+void ssl_listen_thread(void)
 {
-	// create pthread_t queue
-	vector <pair<pthread_t, pthread_attr_t> > pthread_vector;
-	pthread_vector.resize(Config::max_client_fd);
-	queue<int> pthread_queue;
-
-	for (int i = 0; i < Config::max_client_fd; ++i) {
-		pthread_queue.push(i);
-	}
-
-	int pthread_vector_pos = -1;
-
 	SSL_library_init();
 	SSL_CTX *ssl_ctx;
 
@@ -62,7 +49,7 @@ void* ssl_listen_thread(void* arg)
 		  << endl << flush;
 		abort();
 	}
-
+	SecureCounter cnt_handle_connection;
 	// accept and handle_connection
 	while (true) {
 		struct sockaddr_in addr;
@@ -79,51 +66,21 @@ void* ssl_listen_thread(void* arg)
 		 * TODO:
 		 * now just pthread_create, in future connection pool will be implemented
 		 */
-
-		pthread_mutex_lock(&mutex);
-		if (!pthread_queue.empty()) {
-			pthread_vector_pos = pthread_queue.front();
-			pthread_queue.pop();
-		}
-		pthread_mutex_unlock(&mutex);
-
-		if (pthread_vector_pos < 0) {
-			cout << "connection dropped" << endl << flush;
-			// too much connections, drop
+		
+		if(cnt_handle_connection.get() >= Config::max_client_fd) {
+			SSL_free(ssl);
 			close(client_fd);
 			continue;
 		}
-
-		char buf[1024];
-		int count;
-
-		pthread_attr_init(&pthread_vector[pthread_vector_pos].second);
-		pthread_attr_setdetachstate(&pthread_vector[pthread_vector_pos].second,
-		  PTHREAD_CREATE_DETACHED
-		  );
-
-		handle_connection_arg_t* handle_arg = new handle_connection_arg_t;
-
-		handle_arg->fd = client_fd;
-		handle_arg->thread_data = &pthread_vector[pthread_vector_pos];
-		handle_arg->thread_queue = &pthread_queue;
-		handle_arg->pthread_vector_pos = pthread_vector_pos;
-		handle_arg->ssl = ssl;
-
-		//		handle_connection(static_cast<void*> (handle_arg));
-
-		if (pthread_create(&pthread_vector[pthread_vector_pos].first,
-		  &pthread_vector[pthread_vector_pos].second,
-		  handle_connection,
-		  static_cast<void*> (handle_arg)) != 0) {
-			// return back to pool
-			cerr << "fail to create thread" << endl << cerr << endl;
-			pthread_queue.push(pthread_vector_pos);
+		
+		try {
+			thread t (handle_connection, client_fd, ssl, &cnt_handle_connection);
+			t.detach();
+		} catch (std::exception &e) {
+			cerr << e.what() << endl << flush;
 			SSL_free(ssl);
 			close(client_fd);
-			delete handle_arg;
 		}
-		pthread_vector_pos = -1;
 	}
 
 	//serve forever

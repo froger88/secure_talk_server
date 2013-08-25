@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <unistd.h>
-#include <pthread.h>
+#include <thread>
 #include <cstdlib>
 #include <arpa/inet.h>
 #include <sys/socket.h>
@@ -19,13 +19,12 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 #include <netdb.h>
-#include <queue>
-#include <vector>
 
 #include "Config.h"
 #include "handle_connection.h"
+#include "SecureCounter.h"
 
-void* ssl_listen_thread(void* arg);
+void ssl_listen_thread();
 
 #endif	/* SSL_LISTEN_THREAD_H */
 
