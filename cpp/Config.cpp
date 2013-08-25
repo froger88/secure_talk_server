@@ -20,6 +20,9 @@ extern std::string Config::ssl_key;
 // ssl cert
 extern std::string Config::ssl_cert;
 
+// max client fd
+extern int Config::max_client_fd;
+
 Config::Config() { }
 
 Config::Config(const Config& orig) { }
@@ -52,6 +55,7 @@ bool Config::read_config(const char* file)
 		cfg.lookupValue("ssl_port", ssl_port);
 		cfg.lookupValue("ssl_cert", ssl_cert);
 		cfg.lookupValue("ssl_key", ssl_key);
+		cfg.lookupValue("max_client_fd", max_client_fd);
 
 	} catch (std::exception &e) {
 		std::cout << "Exception while read config file: " << e.what() << std::endl;
@@ -95,6 +99,7 @@ void Config::write_conf_example(const char* file)
 	root.add("ssl_port", libconfig::Setting::TypeInt) = 9900;
 	root.add("ssl_cert", libconfig::Setting::TypeString) = "./ssl/cert.pem";
 	root.add("ssl_key", libconfig::Setting::TypeString) = "./ssl/key.pem";
+	root.add("max_client_fd", libconfig::Setting::TypeInt) = 100;
 
 	// Write out the new configuration.
 	try {

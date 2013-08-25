@@ -32,6 +32,12 @@ int main(int argc, char* argv[])
 	pthread_attr_setdetachstate(&ssl_listen_th_attr, PTHREAD_CREATE_DETACHED);
 	pthread_setconcurrency(10);
 	
+	/*
+	 * TODO:
+	 * prototype - listen on just one interface, one port and generally one
+	 * listening thread. In future, listening on multiple interfaces,
+	 * multiple threads etc will be implemented.
+	 */
 	// create ssl_listen_thread
 	cout << "initializing ssl_listen_th" <<endl;
 	if(pthread_create(&ssl_listen_th, &ssl_listen_th_attr, ssl_listen_thread, NULL) != 0) {

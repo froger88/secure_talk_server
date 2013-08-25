@@ -29,6 +29,9 @@ public:
 	// ssl cert
 	static std::string ssl_cert;
 	
+	// max client fd
+	static int max_client_fd;
+	
 	static bool read_config(const char* file="secure_talk_server.conf");
 	static void show_usage();
 	static void show_configuration();
