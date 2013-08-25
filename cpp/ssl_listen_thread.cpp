@@ -88,10 +88,14 @@ void* ssl_listen_thread(void* arg)
 		pthread_mutex_unlock(&mutex);
 
 		if (pthread_vector_pos < 0) {
+			cout << "connection dropped" << endl << flush;
 			// too much connections, drop
 			close(client_fd);
 			continue;
 		}
+
+		char buf[1024];
+		int count;
 
 		pthread_attr_init(&pthread_vector[pthread_vector_pos].second);
 		pthread_attr_setdetachstate(&pthread_vector[pthread_vector_pos].second,
@@ -106,11 +110,14 @@ void* ssl_listen_thread(void* arg)
 		handle_arg->pthread_vector_pos = pthread_vector_pos;
 		handle_arg->ssl = ssl;
 
+		//		handle_connection(static_cast<void*> (handle_arg));
+
 		if (pthread_create(&pthread_vector[pthread_vector_pos].first,
 		  &pthread_vector[pthread_vector_pos].second,
 		  handle_connection,
-		  static_cast<void*> (handle_arg)) == 0) {
+		  static_cast<void*> (handle_arg)) != 0) {
 			// return back to pool
+			cerr << "fail to create thread" << endl << cerr << endl;
 			pthread_queue.push(pthread_vector_pos);
 			SSL_free(ssl);
 			close(client_fd);
