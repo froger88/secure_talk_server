@@ -15,6 +15,7 @@ add_executable (secure_talk_server
 	SecureCounter.cpp
 	ssl_listen_thread.cpp
 	handle_connection.cpp
+	Package.cpp
 )
 
 target_link_libraries (secure_talk_server
