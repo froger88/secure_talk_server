@@ -58,7 +58,7 @@
 #include <sys/socket.h>
 #include <unistd.h>
 #include "SecureCounter.h"
-
+#include "Logger.h"
 #include "Config.h"
 
 using namespace std;

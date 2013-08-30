@@ -153,7 +153,8 @@ void Config::show_configuration()
 	std::cout << "\tssl_key = " << ssl_key << std::endl;
 	std::cout << "\tssl_ip = " << ssl_ip << std::endl;
 	std::cout << "\tssl_port = " << ssl_port << std::endl;
-	std::cout << "\tlog_prior = " << hex << log_prior << dec << std::endl;
+	std::cout << "\tlog_prior = 0x" << hex << log_prior << dec << std::endl;
+	std::cout << "\tmax_client_fd = " << max_client_fd << endl;
 	std::cout << "######################## END OF CONFIG ########################"
 	  << std::endl;
 }
@@ -171,7 +172,13 @@ void Config::write_conf_example(const char* file)
 	root.add("ssl_cert", libconfig::Setting::TypeString) = "./ssl/cert.pem";
 	root.add("ssl_key", libconfig::Setting::TypeString) = "./ssl/key.pem";
 	root.add("max_client_fd", libconfig::Setting::TypeInt) = 100;
-
+	root.add("log_debug", libconfig::Setting::TypeBoolean) = false;
+	root.add("log_notice", libconfig::Setting::TypeBoolean) = false;
+	root.add("log_info", libconfig::Setting::TypeBoolean) = false;
+	root.add("log_success", libconfig::Setting::TypeBoolean) = true;
+	root.add("log_warning", libconfig::Setting::TypeBoolean) = true;
+	root.add("log_error", libconfig::Setting::TypeBoolean) = true;
+	root.add("log_fatal", libconfig::Setting::TypeBoolean) = true;
 	// Write out the new configuration.
 	try {
 		cfg.writeFile(file);

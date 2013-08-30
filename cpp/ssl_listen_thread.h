@@ -66,6 +66,7 @@
 #include "Config.h"
 #include "handle_connection.h"
 #include "SecureCounter.h"
+#include "Logger.h"
 
 void ssl_listen_thread();
 

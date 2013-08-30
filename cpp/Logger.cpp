@@ -105,14 +105,14 @@ void Logger::log(LogPriority prior, const char *__restrict fmt, ...)
 			break;
 		case L_WARNING:
 			if(Config::log_prior & L_WARNING)
-				printf("[WARNING] [%s] %s\n", date_time, buffer);
+				fprintf(stderr, "[WARNING] [%s] %s\n", date_time, buffer);
 		case L_ERROR:
 			if (Config::log_prior & L_ERROR)
-				printf("[ERROR]   [%s] %s\n", date_time, buffer);
+				fprintf(stderr, "[ERROR]   [%s] %s\n", date_time, buffer);
 			break;
 		case L_FATAL:
 			if (Config::log_prior & L_FATAL)
-				printf("[FATAL]   [%s] %s\n", date_time, buffer);
+				fprintf(stderr, "[FATAL]   [%s] %s\n", date_time, buffer);
 			break;
 	}
 	va_end(args);

@@ -1,5 +1,3 @@
-#include "handle_connection.h"
-
 /*
                     +IMMMM .~MMZ.
                  .MM NMMMMM  .MMMM
@@ -43,6 +41,10 @@
           S   E   A    L       O   F      T   H   E       D   A   Y
 */
 
+#include "handle_connection.h"
+
+extern SecureLogger* sLog;
+
 using namespace std;
 
 void handle_connection(int fd, SSL* ssl, SecureCounter* cnt_handle_connection)
@@ -53,40 +55,34 @@ void handle_connection(int fd, SSL* ssl, SecureCounter* cnt_handle_connection)
 
 	// accept
 	try {
-		cerr << "handle_connection accepting" << endl << flush;
+		sLog->log(L_DEBUG, "handle_connection: accepting");
 		if (SSL_accept(ssl) == 0) {
 			// errors occured
-			cerr << "handle_connection accept, errors occured" << endl << flush;
+			sLog->log(L_ERROR, "handle_connection accept, errors occured");
 			goto cleanup;
 		}
 	} catch (std::exception &e) {
-		cerr << "handle_connection: exception while accepting" << e.what()
-		  << endl << flush;
+		sLog->log(L_ERROR, "handle_connection: exception while accepting, %s ", e.what());
 	}
 
 	while (((string) buf).find("quit") == string::npos) {
-		cerr << "handle_connection read" << endl << flush;
+		sLog->log(L_DEBUG, "handle_connection: SSL_read");
 		count = SSL_read(ssl, buf, sizeof (buf)); /* get request */
 		if (count > 0) {
 			buf[count] = 0;
-			cerr << "Client msg count: " << count << endl <<flush;
-			cerr << "Client msg: " <<flush;
-			for(int i=0; i< count; ++i) {
-				cerr << (int)(unsigned char)buf[i] << " " <<flush;
-			}
-			cerr << endl << flush;
+
 			// answer with the same
-			cerr << "handle_connection SSL_write" << endl << flush;
+			sLog->log(L_DEBUG, "handle_connection: SSL_write");
 			SSL_write(ssl, buf, count);
 		} else {
 			// errors occured
 			goto cleanup;
 		}
-		cerr << "handle_connection SSL_get_fd" << endl << flush;
+		sLog->log(L_DEBUG, "handle_connection: SSL_get_fd");
 		fd = SSL_get_fd(ssl);
 	}
 cleanup:
-	cerr << "handle_connection cleanup" << endl << flush;
+	sLog->log(L_INFO, "handle_connection: cleanup");
 	// return back to pool
 	SSL_free(ssl);
 	close(fd);

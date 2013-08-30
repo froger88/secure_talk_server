@@ -51,7 +51,8 @@ extern SecureLogger* sLog;
 
 void ssl_listen_thread(void)
 {
-	sLog->log(L_DEBUG, "ssl_listen_thread");
+	sLog->log(L_NOTICE, "ssl_listen_thread");
+	
 	SSL_library_init();
 	SSL_CTX *ssl_ctx;
 
@@ -60,22 +61,22 @@ void ssl_listen_thread(void)
 
 	ssl_method = SSLv3_server_method();
 	ssl_ctx = SSL_CTX_new(ssl_method);
-	if (ssl_ctx == NULL) {
-		cerr << "ssl_ctx init fail" << endl << flush;
+	if (!ssl_ctx) {
+		sLog->log(L_FATAL, "ssl_listen_thread: ssl_ctx == NULL");
 		abort();
 	}
 
 	// set up certificates
 	if (SSL_CTX_use_certificate_file(ssl_ctx, Config::ssl_cert.c_str(), SSL_FILETYPE_PEM) <= 0) {
-		cerr << "Fail to load CertFile" << endl << flush;
+		sLog->log(L_FATAL,  "ssl_listen_thread: Fail to load CertFile");
 		abort();
 	}
 	if (SSL_CTX_use_PrivateKey_file(ssl_ctx, Config::ssl_key.c_str(), SSL_FILETYPE_PEM) <= 0) {
-		cerr << "Fail to load PrivateKey" << endl << flush;
+		sLog->log(L_FATAL, "ssl_listen_thread: Fail to load PrivateKey");
 		abort();
 	}
 	if (!SSL_CTX_check_private_key(ssl_ctx)) {
-		cerr << "Private key does not match the public certificate" << endl << flush;
+		sLog->log(L_FATAL, "ssl_listen_thread: Private key does not match the public certificate");
 		abort();
 	}
 
@@ -89,12 +90,12 @@ void ssl_listen_thread(void)
 	addr.sin_port = htons(Config::ssl_port);
 	addr.sin_addr.s_addr = INADDR_ANY;
 	if (bind(fd, (struct sockaddr*) &addr, sizeof (addr)) != 0) {
-		cerr << "fail to bind" << endl << flush;
+		sLog->log(L_FATAL, "ssl_listen_thread: fail to bind");
 		abort();
 	}
 	if (listen(fd, 100) != 0) {
-		cerr << "fail to listen on " << Config::ssl_ip << ":" << Config::ssl_port
-		  << endl << flush;
+		sLog->log(L_FATAL, "ssl_listen_thread: fail to listen on %s:%d", 
+		  Config::ssl_ip.c_str(), Config::ssl_port);
 		abort();
 	}
 	SecureCounter cnt_handle_connection;
@@ -106,16 +107,15 @@ void ssl_listen_thread(void)
 
 		int client_fd = accept(fd, (struct sockaddr*) &addr, &len);
 
-		cout << "Connection: " << inet_ntoa(addr.sin_addr) << ":" << ntohs(addr.sin_port) << endl;
+		sLog->log(L_DEBUG, "ssl_listen_thread: Connection: %s:%hd",
+		  inet_ntoa(addr.sin_addr), ntohs(addr.sin_port));
+		
 		ssl = SSL_new(ssl_ctx);
 		SSL_set_fd(ssl, client_fd);
-
-		/*
-		 * TODO:
-		 * now just pthread_create, in future connection pool will be implemented
-		 */
 		
 		if(cnt_handle_connection.get() >= Config::max_client_fd) {
+			sLog->log(L_ERROR, "ssl_listen_thread: Too much connections, drop");
+
 			SSL_free(ssl);
 			close(client_fd);
 			continue;
@@ -125,7 +125,8 @@ void ssl_listen_thread(void)
 			thread t (handle_connection, client_fd, ssl, &cnt_handle_connection);
 			t.detach();
 		} catch (std::exception &e) {
-			cerr << e.what() << endl << flush;
+			sLog->log(L_ERROR, "ssl_listen_thread: Exception catched: %s", e.what());
+
 			SSL_free(ssl);
 			close(client_fd);
 		}

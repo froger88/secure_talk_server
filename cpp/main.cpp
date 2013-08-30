@@ -77,14 +77,6 @@ int main(int argc, char* argv[])
 	
 	sLog = new SecureLogger();
 
-	sLog->log(L_DEBUG, "debug_test");	
-//	log.log(L_DEBUG, "debug_test");
-//	log.log(L_NOTICE, "notice_test");
-//	log.log(L_INFO, "info_test");
-//	log.log(L_SUCCESS, "success_test");
-//	log.log(L_ERROR, "error_test");
-//	log.log(L_FATAL, "fatal_test");
-	
 	/*
 	 * TODO:
 	 * prototype - listen on just one interface, one port and generally one
@@ -92,7 +84,7 @@ int main(int argc, char* argv[])
 	 * multiple threads etc will be implemented.
 	 */
 	// create ssl_listen_thread
-	cout << "initializing ssl_listen_th" <<endl;
+	sLog->log(L_INFO, "initializing ssl_listen_th");
 	thread t(ssl_listen_thread);
 	t.detach();
 	
