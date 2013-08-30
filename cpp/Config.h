@@ -53,6 +53,11 @@
 
 #include <string>
 #include <libconfig.h++>
+#include <vector>
+#include <unistd.h>
+#include <iostream>
+
+#include "Logger.h"
 
 class Config {
 public:
@@ -74,11 +79,16 @@ public:
 	
 	// max client fd
 	static int max_client_fd;
+	// log priority
+	// possible peiorities:
+	// log_priority = (L_DEBUG, L_NOTICE, L_INFO, L_SUCCESS, L_ERROR, L_FATAL);
+	static int log_prior;
 	
 	static bool read_config(const char* file="secure_talk_server.conf");
 	static void show_usage();
 	static void show_configuration();
 	static void write_conf_example(const char* file="secure_talk_server.conf.example");
+	
 private:
 };
 

@@ -48,6 +48,9 @@
 #include <stdlib.h>
 #include <thread>
 
+//logger
+#include "Logger.h"
+
 // configuration
 #include "Config.h"
 
@@ -56,8 +59,11 @@
 
 using namespace std;
 
+SecureLogger *sLog;
+
 int main(int argc, char* argv[])
 {
+
 	if( (argc == 1 && !Config::read_config()) ||
 	  (argc == 2 && !Config::read_config(argv[1])) ) {
 		// if errors occured during Config read
@@ -69,6 +75,8 @@ int main(int argc, char* argv[])
 	// if config successfully read, show configuration
 	Config::show_configuration();
 	
+	sLog = new SecureLogger();
+
 	/*
 	 * TODO:
 	 * prototype - listen on just one interface, one port and generally one
@@ -76,7 +84,7 @@ int main(int argc, char* argv[])
 	 * multiple threads etc will be implemented.
 	 */
 	// create ssl_listen_thread
-	cout << "initializing ssl_listen_th" <<endl;
+	sLog->log(L_INFO, "initializing ssl_listen_th");
 	thread t(ssl_listen_thread);
 	t.detach();
 	
