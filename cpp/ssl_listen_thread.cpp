@@ -43,11 +43,15 @@
 
 
 #include "ssl_listen_thread.h"
+#include "Logger.h"
 
 using namespace std;
 
+extern SecureLogger* sLog;
+
 void ssl_listen_thread(void)
 {
+	sLog->log(L_DEBUG, "ssl_listen_thread");
 	SSL_library_init();
 	SSL_CTX *ssl_ctx;
 

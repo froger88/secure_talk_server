@@ -6,50 +6,50 @@
  */
 
 /*
-                    +IMMMM .~MMZ.
-                 .MM NMMMMM  .MMMM
-                MMM. MMMMMMZ   MMMM.
-              .MMM, .MMMMMMM  ..MMMM
-              .MMM. ZMMMMMMM.   MMMM.
-              .MMM  =MMMMMMM.   MMMM.
-              .MMM . MMMMMMM.  MMMM
-                MMM: MMMMMMM .ZMMM
-                  MMM MMMMMM.~MO
-                      ~MMMN..   ...M.
-                        .?M8 .. +.NI
-                       . .....  MNM D
-                        : D..Z...MO.?.
-                          NM . M..  .~
-                         .~I...     .,
-                          .M.       M.
-                         .M.        :
-                        .M        .MM
-                       .7           M.
-                       M            MO
-                      M.            .8       .=MMMMMMM .
-                     M.             .I    MM$          ,M
-                    .                M MM .             .M
-                    M                 N              .   M
-                   .:                                M   ,.
-                                                     +   .
-                    ,                                Z  .M
-                   .M                               ..  ,
-                    M                  .            M.  M..  =+, .
-                     M        ?        D           :+   7  ..M$ ..
-                     .Z        M.       ,         DMM.     .. =M.
-                      ,M      .8,       M        M.. .MMM,...
-               .. N  M$ MI.    MM.      :.   ..M$
-             .$...  =  MM . D,,MM7       MMMM,
-                   Z...    MN   MM.      MMOMMM7..
-                      .D.,8      M.      :..:NM$
-                                 MM.      .MM~.,
-                                  MM.  ~=7DMMM$.
+					+IMMMM .~MMZ.
+				 .MM NMMMMM  .MMMM
+				MMM. MMMMMMZ   MMMM.
+			  .MMM, .MMMMMMM  ..MMMM
+			  .MMM. ZMMMMMMM.   MMMM.
+			  .MMM  =MMMMMMM.   MMMM.
+			  .MMM . MMMMMMM.  MMMM
+				MMM: MMMMMMM .ZMMM
+				  MMM MMMMMM.~MO
+					  ~MMMN..   ...M.
+						.?M8 .. +.NI
+					   . .....  MNM D
+						: D..Z...MO.?.
+						  NM . M..  .~
+						 .~I...     .,
+						  .M.       M.
+						 .M.        :
+						.M        .MM
+					   .7           M.
+					   M            MO
+					  M.            .8       .=MMMMMMM .
+					 M.             .I    MM$          ,M
+					.                M MM .             .M
+					M                 N              .   M
+				   .:                                M   ,.
+													 +   .
+					,                                Z  .M
+				   .M                               ..  ,
+					M                  .            M.  M..  =+, .
+					 M        ?        D           :+   7  ..M$ ..
+					 .Z        M.       ,         DMM.     .. =M.
+					  ,M      .8,       M        M.. .MMM,...
+			   .. N  M$ MI.    MM.      :.   ..M$
+			 .$...  =  MM . D,,MM7       MMMM,
+				   Z...    MN   MM.      MMOMMM7..
+					  .D.,8      M.      :..:NM$
+								 MM.      .MM~.,
+								  MM.  ~=7DMMM$.
 
-          S   E   A    L       O   F      T   H   E       D   A   Y
-*/
+		  S   E   A    L       O   F      T   H   E       D   A   Y
+ */
 
 #include "Config.h"
-#include <iostream>
+
 
 // host IP
 extern std::string Config::ssl_ip;
@@ -65,6 +65,9 @@ extern std::string Config::ssl_cert;
 
 // max client fd
 extern int Config::max_client_fd;
+
+// log priorities
+extern int Config::log_prior;
 
 Config::Config() { }
 
@@ -93,12 +96,36 @@ bool Config::read_config(const char* file)
 		return false;
 	}
 
+	// turn logging on default
+	log_prior = L_INFO | L_SUCCESS | L_WARNING | L_ERROR | L_FATAL;
+	bool bool_val = false;
 	try {
 		cfg.lookupValue("ssl_ip", ssl_ip);
 		cfg.lookupValue("ssl_port", ssl_port);
 		cfg.lookupValue("ssl_cert", ssl_cert);
 		cfg.lookupValue("ssl_key", ssl_key);
 		cfg.lookupValue("max_client_fd", max_client_fd);
+
+		if (cfg.lookupValue("log_debug", bool_val))
+			log_prior |= L_DEBUG & bool_val;
+
+		if (cfg.lookupValue("log_notice", bool_val))
+			log_prior |= L_NOTICE & bool_val;
+
+		if (cfg.lookupValue("log_warning", bool_val))
+			log_prior |= L_WARNING & bool_val;
+
+		if (cfg.lookupValue("log_info", bool_val))
+			log_prior |= L_INFO & bool_val;
+
+		if (cfg.lookupValue("log_success", bool_val))
+			log_prior |= L_SUCCESS & bool_val;
+
+		if (cfg.lookupValue("log_error", bool_val))
+			log_prior |= L_ERROR & bool_val;
+
+		if (cfg.lookupValue("log_fatal", bool_val))
+			log_prior |= L_FATAL & bool_val;
 
 	} catch (std::exception &e) {
 		std::cout << "Exception while read config file: " << e.what() << std::endl;
@@ -126,6 +153,7 @@ void Config::show_configuration()
 	std::cout << "\tssl_key = " << ssl_key << std::endl;
 	std::cout << "\tssl_ip = " << ssl_ip << std::endl;
 	std::cout << "\tssl_port = " << ssl_port << std::endl;
+	std::cout << "\tlog_prior = " << hex << log_prior << dec << std::endl;
 	std::cout << "######################## END OF CONFIG ########################"
 	  << std::endl;
 }

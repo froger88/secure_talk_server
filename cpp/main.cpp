@@ -48,6 +48,9 @@
 #include <stdlib.h>
 #include <thread>
 
+//logger
+#include "Logger.h"
+
 // configuration
 #include "Config.h"
 
@@ -56,8 +59,11 @@
 
 using namespace std;
 
+SecureLogger *sLog;
+
 int main(int argc, char* argv[])
 {
+
 	if( (argc == 1 && !Config::read_config()) ||
 	  (argc == 2 && !Config::read_config(argv[1])) ) {
 		// if errors occured during Config read
@@ -68,6 +74,16 @@ int main(int argc, char* argv[])
 	
 	// if config successfully read, show configuration
 	Config::show_configuration();
+	
+	sLog = new SecureLogger();
+
+	sLog->log(L_DEBUG, "debug_test");	
+//	log.log(L_DEBUG, "debug_test");
+//	log.log(L_NOTICE, "notice_test");
+//	log.log(L_INFO, "info_test");
+//	log.log(L_SUCCESS, "success_test");
+//	log.log(L_ERROR, "error_test");
+//	log.log(L_FATAL, "fatal_test");
 	
 	/*
 	 * TODO:
