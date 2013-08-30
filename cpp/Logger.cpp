@@ -66,13 +66,13 @@ char* Logger::get_time_str()
 	time_t t;
 	struct tm tm;
 	time(&t);
-	
+
 	char* date_time = new char[30];
 	memset(date_time, 0, 30);
-	
+
 	localtime_r(&t, &tm);
 	strftime(date_time, 30, "%Y-%m-%d %T", &tm);
-	
+
 	return date_time;
 }
 
@@ -83,9 +83,9 @@ void Logger::log(LogPriority prior, const char *__restrict fmt, ...)
 	va_list args;
 	va_start(args, fmt);
 	vsnprintf(buffer, 1023, fmt, args);
-	
+
 	char* date_time = get_time_str();
-	
+
 	switch (prior) {
 		case L_DEBUG:
 			if (Config::log_prior & L_DEBUG)
@@ -104,7 +104,7 @@ void Logger::log(LogPriority prior, const char *__restrict fmt, ...)
 				printf("[SUCCESS] [%s] %s\n", date_time, buffer);
 			break;
 		case L_WARNING:
-			if(Config::log_prior & L_WARNING)
+			if (Config::log_prior & L_WARNING)
 				fprintf(stderr, "[WARNING] [%s] %s\n", date_time, buffer);
 		case L_ERROR:
 			if (Config::log_prior & L_ERROR)
@@ -116,6 +116,27 @@ void Logger::log(LogPriority prior, const char *__restrict fmt, ...)
 			break;
 	}
 	va_end(args);
-	
+
 	delete [] date_time;
+}
+
+SecureLogger::SecureLogger() { }
+
+SecureLogger::~SecureLogger() { }
+
+SecureLogger::SecureLogger(const SecureLogger&) { }
+
+void SecureLogger::log(LogPriority prio, __const char* __restrict fmt, ...)
+{
+	try {
+		mut.lock();
+		va_list args;
+		va_start(args, fmt);
+		Logger::log(prio, fmt, args);
+		va_end(args);
+		mut.unlock();
+	} catch (...) {
+		mut.unlock();
+		throw;
+	}
 }

@@ -48,9 +48,6 @@
 		  S   E   A    L       O   F      T   H   E       D   A   Y
  */
 
-#include <string.h>
-#include <netinet/in.h>
-
 #include "Package.h"
 
 namespace SecureTalkServer {

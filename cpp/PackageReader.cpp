@@ -1,8 +1,8 @@
 /* 
- * File:   Logger.h
+ * File:   PackageReader.cpp
  * Author: mazabinski
- *
- * Created on 30 sierpień 2013, 00:22
+ * 
+ * Created on 30 sierpień 2013, 19:36
  */
 
 /*
@@ -48,63 +48,23 @@
 		  S   E   A    L       O   F      T   H   E       D   A   Y
  */
 
-#ifndef LOGGER_H
-#define	LOGGER_H
+#include "PackageReader.h"
 
+extern SecureLogger* sLog;
 
-/*
- INFO:
- * this is basic version of logger.
- * logging to file and file rotations are not supported for now
- * it is good idea, to have one, thread-secured instance of logger
- * but... it is not implemented for now
- * time format is not supported for now 
- * __FILE and __LINE is not supported for now too ..
- * max buffer size is const 1024bytes -1 (for NULL char)
- */
+namespace SecureTalkServer {
 
-#include <cstdio>
-#include <cstdarg>
-#include <sys/time.h>
-#include <mutex>
+	PackageReader::PackageReader(pair<const char*, size_t>& pkg)
+	{
+		sLog->log(L_DEBUG, "PackageReader()");
+		this->pkg = &pkg;
+	}
 
-#include "Config.h"
-using namespace std;
+	PackageReader::PackageReader(const PackageReader& orig) { }
 
-typedef enum {
-	L_DEBUG = 1,
-	L_NOTICE = 2,
-	L_INFO = 4,
-	L_SUCCESS = 8,
-	L_WARNING = 16,
-	L_ERROR = 32,
-	L_FATAL = 64
-} LogPriority;
+	PackageReader::~PackageReader()
+	{
+		pkg = NULL;
+	}
 
-class Logger {
-public:
-	Logger();
-	virtual ~Logger();
-	virtual void log(LogPriority prio, __const char* __restrict fmt, ...);
-
-private:
-	char* get_time_str();
-	Logger(const Logger& orig);
-
-};
-
-class SecureLogger : public Logger {
-public:
-	SecureLogger();
-	virtual ~SecureLogger();
-
-	virtual void log(LogPriority prio, __const char* __restrict fmt, ...);
-
-private:
-	mutex mut;
-
-	SecureLogger(const SecureLogger&);
-};
-
-#endif	/* LOGGER_H */
-
+}

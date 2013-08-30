@@ -88,6 +88,7 @@ public:
 	static void show_usage();
 	static void show_configuration();
 	static void write_conf_example(const char* file="secure_talk_server.conf.example");
+	static void show_logging_options();
 	
 private:
 };

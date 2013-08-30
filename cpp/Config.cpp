@@ -153,10 +153,38 @@ void Config::show_configuration()
 	std::cout << "\tssl_key = " << ssl_key << std::endl;
 	std::cout << "\tssl_ip = " << ssl_ip << std::endl;
 	std::cout << "\tssl_port = " << ssl_port << std::endl;
-	std::cout << "\tlog_prior = 0x" << hex << log_prior << dec << std::endl;
+	show_logging_options();
 	std::cout << "\tmax_client_fd = " << max_client_fd << endl;
 	std::cout << "######################## END OF CONFIG ########################"
 	  << std::endl;
+}
+
+void Config::show_logging_options()
+{
+	std::cout << "\tlog_prior = ";
+
+	if (log_prior & L_DEBUG)
+		std::cout << " DEBUG ";
+
+	if (log_prior & L_NOTICE)
+		std::cout << "NOTICE ";
+
+	if (log_prior & L_INFO)
+		std::cout << "INFO ";
+
+	if (log_prior & L_SUCCESS)
+		std::cout << "SUCCESS ";
+
+	if (log_prior & L_WARNING)
+		std::cout << "WARNING ";
+
+	if (log_prior & L_ERROR)
+		std::cout << "ERROR ";
+
+	if (log_prior & L_FATAL)
+		std::cout << "FATAL ";
+
+	std::cout << std::endl << std::flush;
 }
 
 void Config::write_conf_example(const char* file)
