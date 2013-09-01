@@ -54,14 +54,31 @@ extern SecureLogger* sLog;
 
 namespace SecureTalkServer {
 
-	PackageReader::PackageReader(pair<const char*, size_t>& pkg)
+	PackageReader::PackageReader() { }
+
+	PackageReader::PackageReader(const PackageReader& orig) { }
+
+	/*
+	 * return: 0 - if complete pkg was read
+	 * 
+	 * value less than 0 when incomplete value was read (the number of bytes
+	 * lees than 0 is the number of lacking bytes)
+	 * 
+	 * value more than 0, if pakage has been read postive but there is not complete buffer
+	 * (there are additional bytes in it)
+	 */
+	
+	int PackageReader::start_read(pair<const char*, size_t>& pkg)
 	{
 		sLog->log(L_DEBUG, "PackageReader()");
 		this->pkg = &pkg;
 	}
-
-	PackageReader::PackageReader(const PackageReader& orig) { }
-
+	
+	int PackageReader::read(pair<const char*, size_t>& pkg)
+	{
+		
+	}
+	
 	PackageReader::~PackageReader()
 	{
 		pkg = NULL;
