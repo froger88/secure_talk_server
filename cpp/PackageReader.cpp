@@ -54,7 +54,10 @@ extern SecureLogger* sLog;
 
 namespace SecureTalkServer {
 
-	PackageReader::PackageReader() { }
+	PackageReader::PackageReader()
+	{
+		pkg_iterator = 0;
+	}
 
 	PackageReader::PackageReader(const PackageReader& orig) { }
 
@@ -67,21 +70,53 @@ namespace SecureTalkServer {
 	 * value more than 0, if pakage has been read postive but there is not complete buffer
 	 * (there are additional bytes in it)
 	 */
-	
+
 	int PackageReader::start_read(pair<const char*, size_t>& pkg)
 	{
 		sLog->log(L_DEBUG, "PackageReader()");
-		this->pkg = &pkg;
-	}
-	
-	int PackageReader::read(pair<const char*, size_t>& pkg)
-	{
+
+		// check package buffer length
+		if (pkg.second < 10) {
+			return 10 - pkg.second;
+		}
+		/* read headers ([4B][4B][2B][n])
+		 * first 4B for future flags
+		 * second 4B for package length,
+		 * 2B for package type length
+		 * package length
+		 */
+
+		int32_t ptype;
+		short ptype_len;
+		sscanf(pkg.first, "%ld%ld%hd", &flags, &ptype, &pkg_len, &ptype_len);
+		// convert from network to host
+		flags = ntohl(flags);
+		ptype = ntohl(ptype);
+		ptype_len = ntohs(ptype_len);
 		
-	}
-	
-	PackageReader::~PackageReader()
-	{
-		pkg = NULL;
+		// create buffers and copy data into it
+		pkg_data = new char [pkg_len];
+
+		// copy as much as is in this package
+		if (pkg_len > pkg.second) {
+			// copy pkg.second size of data
+			memcpy(pkg_data, pkg.first, pkg.second);
+		}
+
+		// copy whole package
+		if (pkg_len <= pkg.second) {
+			// copy pkg_len 
+			memcpy(pkg_data, pkg.first, pkg_len);
+		}
+		
+		return pkg.second - pkg_len;
 	}
 
+	int PackageReader::read(pair<const char*, size_t>& pkg) { }
+
+	PackageReader::~PackageReader()
+	{
+		if (!pkg_data)
+			delete pkg_data;
+	}
 }

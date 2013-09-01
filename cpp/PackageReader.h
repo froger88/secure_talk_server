@@ -63,22 +63,33 @@ namespace SecureTalkServer {
 class PackageReader {
 public:
 	PackageReader();
-	
+
 	virtual ~PackageReader();
 	shared_ptr<pair<const char*, size_t> > get_next();
-	
+
 	int start_read(pair<const char*, size_t>& pkg);
 	int read(pair<const char*, size_t>& pkg);
 	
-	inline PackageType get_pkg_type() {
+	inline shared_ptr<multimap<const char*, short> > get_pkg_multimap()
+	{
+		return pkg_map;
+	}
+
+	inline PackageType get_pkg_type()
+	{
 		return pkg_type;
 	}
 
 private:
 	/* const ptr on package to parse*/
-	pair<const char*, size_t>* pkg;
 	PackageType pkg_type;
-	
+	int32_t flags;
+	int32_t pkg_len;
+	int32_t pkg_iterator;
+
+	shared_ptr<multimap<short, const char*> > pkg_map;
+	char* pkg_data;
+
 	PackageReader(const PackageReader& orig);
 };
 }
