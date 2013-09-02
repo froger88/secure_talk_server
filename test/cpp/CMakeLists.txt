@@ -25,4 +25,5 @@ target_link_libraries (test
 	pthread
 	config++
 	ssl
+	unittest++
 )
