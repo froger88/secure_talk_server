@@ -86,8 +86,10 @@ private:
 	int32_t flags;
 	int32_t pkg_len;
 	int32_t pkg_iterator;
+	bool finished;
+	int32_t bytes_now;
 
-	shared_ptr<multimap<short, const char*> > pkg_map;
+	shared_ptr<multimap<const char*, short> > pkg_map;
 	char* pkg_data;
 
 	PackageReader(const PackageReader& orig);

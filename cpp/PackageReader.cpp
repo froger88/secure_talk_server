@@ -57,6 +57,8 @@ namespace SecureTalkServer {
 	PackageReader::PackageReader()
 	{
 		pkg_iterator = 0;
+		finished = false;
+		bytes_now = 0;
 	}
 
 	PackageReader::PackageReader(const PackageReader& orig) { }
@@ -67,8 +69,8 @@ namespace SecureTalkServer {
 	 * value less than 0 when incomplete value was read (the number of bytes
 	 * lees than 0 is the number of lacking bytes)
 	 * 
-	 * value more than 0, if pakage has been read postive but there is not complete buffer
-	 * (there are additional bytes in it)
+	 * value more than 0, if pakage has been read postive but there there are 
+	 * additional bytes in buffer
 	 */
 
 	int PackageReader::start_read(pair<const char*, size_t>& pkg)
@@ -93,7 +95,7 @@ namespace SecureTalkServer {
 		flags = ntohl(flags);
 		ptype = ntohl(ptype);
 		ptype_len = ntohs(ptype_len);
-		
+
 		// create buffers and copy data into it
 		pkg_data = new char [pkg_len];
 
@@ -101,18 +103,65 @@ namespace SecureTalkServer {
 		if (pkg_len > pkg.second) {
 			// copy pkg.second size of data
 			memcpy(pkg_data, pkg.first, pkg.second);
+			bytes_now = pkg.second;
 		}
 
 		// copy whole package
 		if (pkg_len <= pkg.second) {
 			// copy pkg_len 
 			memcpy(pkg_data, pkg.first, pkg_len);
+			bytes_now = pkg_len;
+			finished = true;
 		}
-		
+
 		return pkg.second - pkg_len;
 	}
 
-	int PackageReader::read(pair<const char*, size_t>& pkg) { }
+	/*
+	 * return: 0 - if complete pkg was read
+	 * 
+	 * value less than 0 when incomplete value was read (the number of bytes
+	 * lees than 0 is the number of lacking bytes)
+	 * 
+	 * value more than 0, if pakage has been read postive but there there are 
+	 * additional bytes in buffer
+	 */
+	int PackageReader::read(pair<const char*, size_t>& pkg)
+	{
+
+		//error, too much data
+		if (bytes_now + pkg.second > pkg_len) {
+
+			// complete pkg anyway
+			memcpy(pkg_data + bytes_now, pkg.first, pkg_len - bytes_now);
+			bytes_now = pkg_len;
+
+			sLog->log(L_ERROR,
+			  "PackageReader::read: too much data, pkg_len = %d, bytes_now = %d, over = %d",
+			  pkg_len, bytes_now, bytes_now + pkg.second - pkg_len
+			  );
+
+			return bytes_now + pkg.second - pkg_len;
+		}
+
+		// perfect, pkg is now complete
+		if (bytes_now + pkg.second == pkg_len) {
+			sLog->log(L_DEBUG, "PackageReader::read: PKG complete, pkg_len = %d", pkg_len);
+			memcpy(pkg_data + bytes_now, pkg.first, pkg.second);
+			bytes_now = pkg_len;
+			return 0;
+		}
+
+		// still package is not complete
+		memcpy(pkg_data + bytes_now, pkg.first, pkg.second);
+		bytes_now += pkg.second;
+		
+		sLog->log(L_DEBUG,
+		  "PackageReader::read: PKG still not complete, pkg_len = %d, bytes_now = %d, bytes still waiting for = %d",
+		  pkg_len, bytes_now, pkg_len - bytes_now);
+
+		return pkg_len - bytes_now;
+	}
 
 	PackageReader::~PackageReader()
 	{
