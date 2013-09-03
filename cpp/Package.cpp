@@ -50,6 +50,8 @@
 
 #include "Package.h"
 
+extern SecureLogger* sLog;
+
 namespace SecureTalkServer {
 	using namespace std;
 
@@ -71,14 +73,13 @@ namespace SecureTalkServer {
 		/*
 		 * clean up
 		 */
-		delete data;
-		data = NULL;
+		clean();
 	}
 
 	void Package::create(PackageType ptype)
 	{
 		pkg_type = ptype;
-		
+
 		switch (ptype) {
 			case PT_CREATE_SESSION:
 				pkg_type_str = "create_session";
@@ -99,7 +100,7 @@ namespace SecureTalkServer {
 				pkg_type = PT_UNKNOWN;
 		}
 	}
-	
+
 	void Package::add(const char* data, size_t len)
 	{
 		data_map.insert(pair<const char*, size_t> (data, len));
@@ -107,44 +108,46 @@ namespace SecureTalkServer {
 
 	void Package::clean()
 	{
-		if (data) {
-			delete data;
+		if (data && data[0]) {
+			delete [] data;
 			data = NULL;
 		}
 		data_len = 0;
 		data_map.clear();
+
+		if (data_pair)
+			delete data_pair;
+		data_pair = NULL;
 	}
-	
-	shared_ptr<multimap<const char*, size_t> > Package::finish()
+
+	const pair<char*, size_t>* Package::finish()
 	{
-		shared_ptr<multimap<const char*, size_t> > _return;
-				
+
 		data_len = prepare_pkg();
 		data = new char [data_len];
-		
+
 		sprintf(data, "%d%d%hd%s",
 		  htonl(0), htonl(data_len),
-		  htons((unsigned short)pkg_type_str.size()), pkg_type_str.c_str());
-		
+		  htons((unsigned short) pkg_type_str.size()), pkg_type_str.c_str());
+
 		int32_t p_data_now = 4 + 4 + 2 + pkg_type_str.size();
-		
-		for(auto i=data_map.begin(); i != data_map.end(); ++i) {
-			sprintf(data+p_data_now, "%hd%s",
-			  htons((short)i->second), i->first
+
+		for (auto i = data_map.begin(); i != data_map.end(); ++i) {
+			sprintf(data + p_data_now, "%hd%s",
+			  htons((short) i->second), i->first
 			  );
 		}
-		
-		return _return;
+
+		data_pair = new pair<char*, size_t>(data, data_len);
+		return data_pair;
 	}
-	
-	shared_ptr<multimap<const char*, size_t> > Package::get()
+
+	const pair<char*, size_t>* Package::get()
 	{
-		shared_ptr <multimap<const char*, size_t> > _return;
-		_return->insert(pair<const char*, size_t>(data, data_len));
-		
-		return _return;
+		sLog->log(L_INFO, "Package::get(): data_len = %d", data_len);
+		return data_pair;
 	}
-	
+
 	long Package::prepare_pkg()
 	{
 		/*
@@ -165,11 +168,11 @@ namespace SecureTalkServer {
 		long l = 8;
 		l += 2;
 		l += pkg_type_str.size();
-		
-		for(auto i =data_map.begin(); i != data_map.end(); ++i) {
+
+		for (auto i = data_map.begin(); i != data_map.end(); ++i) {
 			l += 2 + i->second;
 		}
-		
+
 		return l;
 	}
 

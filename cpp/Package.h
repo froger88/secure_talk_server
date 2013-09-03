@@ -85,8 +85,8 @@ public:
 	void add(pair<const char*, size_t> data);
 	void clean();
 
-	shared_ptr<multimap<const char*, size_t > > finish();
-	shared_ptr<multimap<const char*, size_t > > get();
+	const pair<char*, size_t>* finish();
+	const pair<char*, size_t >* get();
 
 private:
 	char* data;
@@ -95,7 +95,9 @@ private:
 	PackageType pkg_type;
 	multimap<const char*, size_t> data_map;
 	string pkg_type_str;
-
+	
+	pair<char*, size_t>* data_pair;
+	
 	long prepare_pkg();
 };
 }
