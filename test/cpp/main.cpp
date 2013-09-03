@@ -43,7 +43,7 @@
 
 #include <unittest++/UnitTest++.h>
 #include "../../cpp/Logger.h"
-//#include "PackageTest.h"
+#include "PackageTest.h"
 //#include "PackageReaderTest.h"
 #include "SecureCounterTest.h"
 
