@@ -90,10 +90,10 @@ namespace SecureTalkServer {
 
 		int32_t ptype;
 		short ptype_len;
-		sscanf(pkg.first, "%ld%ld%hd", &flags, &ptype, &pkg_len, &ptype_len);
+		sscanf(pkg.first, "%ld%ld%hd", &flags, &pkg_len, &ptype_len);
 		// convert from network to host
 		flags = ntohl(flags);
-		ptype = ntohl(ptype);
+		ptype = ntohl(pkg_len);
 		ptype_len = ntohs(ptype_len);
 
 		// create buffers and copy data into it
