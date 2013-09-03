@@ -51,7 +51,41 @@
 #ifndef PACKAGEREADERTEST_H
 #define	PACKAGEREADERTEST_H
 
+#include <unittest++/UnitTest++.h>
+#include <memory>
+#include <map>
+#include "../../cpp/Logger.h"
+#include "../../cpp/Package.h"
+#include "../../cpp/PackageReader.h"
 
+
+using namespace UnitTest;
+using namespace std;
+
+TEST(PackageReaderTest1)
+{
+	SecureTalkServer::Package x;
+	const pair<char*, size_t>* pkg_ptr;
+	/*
+	 * pkg should contain:
+	 * [4b][4b][2b][create_session][2b][test_value]
+	 * = 10 + 14 + 2 + 10
+	 * = 36B
+	 */
+	x.create(SecureTalkServer::PT_CREATE_SESSION);
+	x.add("test_value", 10);
+	pkg_ptr = x.finish();
+	
+	// now start PackageReaderTest1
+	const char* pkg_data = pkg_ptr->first;
+	size_t pkg_len = pkg_ptr->second;
+	
+	pair<const char*, size_t> pkg_pair (pkg_data, pkg_len);
+	
+	CHECK_EQUAL(36, pkg_pair.second);
+	SecureTalkServer::PackageReader pkg_reader;
+	CHECK_EQUAL(0, pkg_reader.start_read(pkg_pair));
+}
 
 #endif	/* PACKAGEREADER_H */
 
