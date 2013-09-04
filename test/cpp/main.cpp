@@ -46,6 +46,8 @@
 #include "PackageTest.h"
 #include "PackageReaderTest.h"
 #include "SecureCounterTest.h"
+#include "UtilsTest.h"
+#include "../../cpp/utils.h"
 
 SecureLogger *sLog;
 
