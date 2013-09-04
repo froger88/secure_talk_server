@@ -61,6 +61,7 @@
 #include <netinet/in.h>
 
 #include "Logger.h"
+#include "utils.h"
 
 namespace SecureTalkServer {
 using namespace std;
@@ -95,9 +96,9 @@ private:
 	PackageType pkg_type;
 	multimap<const char*, size_t> data_map;
 	string pkg_type_str;
-	
+
 	pair<char*, size_t>* data_pair;
-	
+
 	long prepare_pkg();
 };
 }

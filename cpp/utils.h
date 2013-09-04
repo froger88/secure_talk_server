@@ -1,10 +1,9 @@
 /* 
- * File:   PackageReader.h
+ * File:   utils.h
  * Author: mazabinski
  *
- * Created on 30 sierpień 2013, 19:36
+ * Created on 4 wrzesień 2013, 02:17
  */
-
 /*
 					+IMMMM .~MMZ.
 				 .MM NMMMMM  .MMMM
@@ -48,54 +47,21 @@
 		  S   E   A    L       O   F      T   H   E       D   A   Y
  */
 
-#ifndef PACKAGEREADER_H
-#define	PACKAGEREADER_H
+#ifndef UTILS_H
+#define	UTILS_H
 
-#include <memory>
-#include <map>
-#include "Package.h"
-#include "Logger.h"
-#include "utils.h"
+#include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
 
-using namespace std;
+void write_int16(char* buff, int16_t data);
+void write_int32(char* buff, int32_t data);
+void write_int64(char* buff, int64_t data);
+void write_str(char* buff, const char* data, size_t data_len);
 
-namespace SecureTalkServer {
+int16_t read_int16(const char* buff);
+int32_t read_int32(const char* buff);
+int64_t read_int64(const char* buff);
 
-class PackageReader {
-public:
-	PackageReader();
-
-	virtual ~PackageReader();
-	pair<const char*, size_t>* get_next();
-
-	int start_read(pair<const char*, size_t>& pkg);
-	int read(pair<const char*, size_t>& pkg);
-
-	inline multimap<const char*, short>* get_pkg_multimap()
-	{
-		return pkg_map;
-	}
-
-	inline PackageType get_pkg_type()
-	{
-		return pkg_type;
-	}
-
-private:
-	/* const ptr on package to parse*/
-	PackageType pkg_type;
-	int32_t flags;
-	int32_t pkg_len;
-	int32_t pkg_iterator;
-	bool finished;
-	int32_t bytes_now;
-
-	multimap<const char*, short> *pkg_map;
-	char* pkg_data;
-
-	PackageReader(const PackageReader& orig);
-};
-}
-
-#endif	/* PACKAGEREADER_H */
+#endif	/* UTILS_H */
 
