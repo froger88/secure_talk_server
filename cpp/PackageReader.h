@@ -55,6 +55,7 @@
 #include <map>
 #include "Package.h"
 #include "Logger.h"
+#include "utils.h"
 
 using namespace std;
 
@@ -65,12 +66,12 @@ public:
 	PackageReader();
 
 	virtual ~PackageReader();
-	shared_ptr<pair<const char*, size_t> > get_next();
+	pair<const char*, size_t>* get_next();
 
 	int start_read(pair<const char*, size_t>& pkg);
 	int read(pair<const char*, size_t>& pkg);
-	
-	inline shared_ptr<multimap<const char*, short> > get_pkg_multimap()
+
+	inline multimap<const char*, short>* get_pkg_multimap()
 	{
 		return pkg_map;
 	}
@@ -89,7 +90,7 @@ private:
 	bool finished;
 	int32_t bytes_now;
 
-	shared_ptr<multimap<const char*, short> > pkg_map;
+	multimap<const char*, short> *pkg_map;
 	char* pkg_data;
 
 	PackageReader(const PackageReader& orig);
