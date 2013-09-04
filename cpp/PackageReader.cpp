@@ -56,8 +56,8 @@ namespace SecureTalkServer {
 
 	PackageReader::PackageReader()
 	{
-		pkg_iterator = 0;
 		finished = false;
+		parsed = false;
 		bytes_now = 0;
 	}
 
@@ -88,17 +88,15 @@ namespace SecureTalkServer {
 		 * package length
 		 */
 
-		int32_t ptype;
-		short ptype_len;
 		// read package headers
 		flags = read_int32(pkg.first);
-		pkg_len = read_int32(pkg.first+4);
-		ptype_len = read_int16(pkg.first+8);
-		
+		pkg_len = read_int32(pkg.first + 4);
+		pkg_type_len = read_int16(pkg.first + 8);
+
 		// convert from network to host
 		flags = ntohl(flags);
 		pkg_len = ntohl(pkg_len);
-		ptype_len = ntohs(ptype_len);
+		pkg_type_len = ntohs(pkg_type_len);
 
 		// create buffers and copy data into it
 		pkg_data = new char [pkg_len];
@@ -159,7 +157,7 @@ namespace SecureTalkServer {
 		// still package is not complete
 		memcpy(pkg_data + bytes_now, pkg.first, pkg.second);
 		bytes_now += pkg.second;
-		
+
 		sLog->log(L_DEBUG,
 		  "PackageReader::read: PKG still not complete, pkg_len = %d, bytes_now = %d, bytes still waiting for = %d",
 		  pkg_len, bytes_now, pkg_len - bytes_now);
@@ -167,9 +165,63 @@ namespace SecureTalkServer {
 		return pkg_len - bytes_now;
 	}
 
+	void PackageReader::parse()
+	{
+		size_t pos = 0;
+		// parse pkg_name:
+		if (pkg_len >= pkg_type_len) {
+			string type;
+			type.assign(pkg_data + 10, pkg_type_len);
+			
+			pkg_type = package_type2str(type);
+			pos = 10+pkg_type_len;
+		}
+
+		// add as much as you can
+		while(pos < pkg_len)
+		{
+			int16_t len = read_int16(pkg_data+pos);
+			pos += 2;
+			len = ntohs(len);
+			if(pkg_len+pos+len <= pkg_len)
+				pkg_map->insert(pair<const char*, short>(pkg_data+pos, len));
+			else
+				break;
+			
+			pos += len;
+		}
+		
+		parsed = true;
+	}
+
+	multimap<const char*, short>* PackageReader::get_pkg_multimap()
+	{
+		// finished and pkg_map created and data has been parsed into it
+		if (finished && pkg_map && parsed)
+			return pkg_map;
+
+		// pkg map doesn't exists - create new one, then return with empty
+		if (!pkg_map)
+			pkg_map = new multimap<const char*, short>;
+
+
+		if (!finished && !parsed)
+			return pkg_map;
+
+		if (finished && !parsed)
+			parse();
+
+		return pkg_map;
+	}
+
 	PackageReader::~PackageReader()
 	{
-		if (!pkg_data)
-			delete pkg_data;
+		if (!pkg_data && !pkg_data[0])
+			delete [] pkg_data;
+		pkg_data = NULL;
+		
+		if (!pkg_map)
+			delete pkg_map;
+		pkg_map = NULL;
 	}
 }

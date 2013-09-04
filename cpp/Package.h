@@ -72,8 +72,12 @@ typedef enum {
 	PT_INVITE_CLIENT,
 	PT_DESTROY_SESSION,
 	PT_QUIT,
+	PT_PING,
+	PT_PONG,
 	PT_UNKNOWN
 } PackageType;
+
+PackageType package_type2str(string& str);
 
 class Package {
 public:

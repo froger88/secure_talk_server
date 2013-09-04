@@ -55,6 +55,27 @@ extern SecureLogger* sLog;
 namespace SecureTalkServer {
 	using namespace std;
 
+	PackageType package_type2str(string& str)
+	{
+		if (str == "create_session") {
+			return PT_CREATE_SESSION;
+		} else if (str == "destroy_session") {
+			return PT_DESTROY_SESSION;
+		} else if (str == "join_session") {
+			return PT_JOIN_SESSION;
+		} else if (str == "invite") {
+			return PT_INVITE_CLIENT;
+		} else if (str == "quit") {
+			return PT_QUIT;
+		} else if (str == "ping") {
+			return PT_PING;
+		} else if (str == "pong") {
+			return PT_PONG;
+		}
+
+		return PT_UNKNOWN;
+	}
+
 	Package::Package()
 	{
 		data = NULL;
@@ -95,6 +116,12 @@ namespace SecureTalkServer {
 				break;
 			case PT_QUIT:
 				pkg_type_str = "quit";
+				break;
+			case PT_PING:
+				pkg_type_str = "ping";
+				break;
+			case PT_PONG:
+				pkg_type_str = "pong";
 				break;
 			default:
 				pkg_type = PT_UNKNOWN;

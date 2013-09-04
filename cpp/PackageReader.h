@@ -66,15 +66,11 @@ public:
 	PackageReader();
 
 	virtual ~PackageReader();
-	pair<const char*, size_t>* get_next();
 
 	int start_read(pair<const char*, size_t>& pkg);
 	int read(pair<const char*, size_t>& pkg);
 
-	inline multimap<const char*, short>* get_pkg_multimap()
-	{
-		return pkg_map;
-	}
+	multimap<const char*, short>* get_pkg_multimap();
 
 	inline PackageType get_pkg_type()
 	{
@@ -84,15 +80,19 @@ public:
 private:
 	/* const ptr on package to parse*/
 	PackageType pkg_type;
+	
 	int32_t flags;
 	int32_t pkg_len;
-	int32_t pkg_iterator;
+	int16_t pkg_type_len;
+	
 	bool finished;
+	bool parsed;
 	int32_t bytes_now;
 
 	multimap<const char*, short> *pkg_map;
 	char* pkg_data;
 
+	void parse();
 	PackageReader(const PackageReader& orig);
 };
 }
