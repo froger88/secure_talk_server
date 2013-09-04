@@ -18,6 +18,7 @@ add_executable (secure_talk_server
 	handle_connection.cpp
 	Package.cpp
 	PackageReader.cpp
+	utils.cpp
 )
 
 target_link_libraries (secure_talk_server

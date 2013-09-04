@@ -126,16 +126,17 @@ namespace SecureTalkServer {
 		data_len = prepare_pkg();
 		data = new char [data_len];
 
-		sprintf(data, "%d%d%hd%s",
-		  htonl(0), htonl(data_len),
-		  htons((unsigned short) pkg_type_str.size()), pkg_type_str.c_str());
+		write_int32(data, htonl(0));
+		write_int32(data + 4, htonl(data_len));
+		write_int16(data + 8, htons(pkg_type_str.size()));
+		write_str(data + 10, pkg_type_str.c_str(), pkg_type_str.size());
 
 		int32_t p_data_now = 4 + 4 + 2 + pkg_type_str.size();
 
 		for (auto i = data_map.begin(); i != data_map.end(); ++i) {
-			sprintf(data + p_data_now, "%hd%s",
-			  htons((short) i->second), i->first
-			  );
+			write_int16(data + p_data_now, htons(i->second));
+			p_data_now += 2;
+			write_str(data + p_data_now, i->first, i->second);
 		}
 
 		data_pair = new pair<char*, size_t>(data, data_len);
@@ -175,5 +176,4 @@ namespace SecureTalkServer {
 
 		return l;
 	}
-
 }
