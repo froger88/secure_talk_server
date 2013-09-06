@@ -19,6 +19,7 @@ add_executable (test
 	../../cpp/SecureCounter.cpp
 	../../cpp/Package.cpp
 	../../cpp/PackageReader.cpp
+	../../cpp/utils.cpp
 )
 
 target_link_libraries (test
