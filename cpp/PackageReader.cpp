@@ -173,7 +173,7 @@ namespace SecureTalkServer {
 			string type;
 			type.assign(pkg_data + 10, pkg_type_len);
 			
-			pkg_type = package_type2str(type);
+			pkg_type = package_str2type(type);
 			pos = 10+pkg_type_len;
 		}
 

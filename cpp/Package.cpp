@@ -55,7 +55,7 @@ extern SecureLogger* sLog;
 namespace SecureTalkServer {
 	using namespace std;
 
-	PackageType package_type2str(string& str)
+	PackageType package_str2type(string& str)
 	{
 		if (str == "create_session") {
 			return PT_CREATE_SESSION;

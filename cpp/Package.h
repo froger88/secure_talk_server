@@ -77,7 +77,7 @@ typedef enum {
 	PT_UNKNOWN
 } PackageType;
 
-PackageType package_type2str(string& str);
+PackageType package_str2type(string& str);
 
 class Package {
 public:

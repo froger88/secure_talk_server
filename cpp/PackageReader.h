@@ -74,17 +74,20 @@ public:
 
 	inline PackageType get_pkg_type()
 	{
+		if (finished && !parsed)
+			parse();
+
 		return pkg_type;
 	}
 
 private:
 	/* const ptr on package to parse*/
 	PackageType pkg_type;
-	
+
 	int32_t flags;
 	int32_t pkg_len;
 	int16_t pkg_type_len;
-	
+
 	bool finished;
 	bool parsed;
 	int32_t bytes_now;
