@@ -19,6 +19,7 @@ add_executable (secure_talk_server
 	Package.cpp
 	PackageReader.cpp
 	utils.cpp
+	Client.cpp
 )
 
 target_link_libraries (secure_talk_server
