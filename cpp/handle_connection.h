@@ -60,6 +60,7 @@
 #include "SecureCounter.h"
 #include "Logger.h"
 #include "Config.h"
+#include "Client.h"
 
 using namespace std;
 

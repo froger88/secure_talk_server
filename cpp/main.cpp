@@ -63,6 +63,8 @@ SecureLogger *sLog;
 
 int main(int argc, char* argv[])
 {
+	// initialize rand
+	srandom(time(NULL));
 
 	if( (argc == 1 && !Config::read_config()) ||
 	  (argc == 2 && !Config::read_config(argv[1])) ) {
